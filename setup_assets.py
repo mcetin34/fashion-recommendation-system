@@ -46,26 +46,49 @@ def download_asset(name: str, destination: Path) -> None:
 
 
 def download_images() -> None:
-    image_directory = ROOT / "data" / "images" / "images"
-    if image_directory.is_dir() and any(image_directory.glob("*.jpg")):
-        print("[SKIP] Product images are already present")
+    root = ROOT / "data" / "images"
+    image_directory = root / "images"
+
+    def check_images():
+        # Fotoğraflar bir üst klasördeyse doğru yere taşı.
+        if root.exists() and any(root.glob("*.jpg")):
+            image_directory.mkdir(parents=True, exist_ok=True)
+            for photo in root.glob("*.jpg"):
+                photo.rename(image_directory / photo.name)
+
+        return sum(1 for _ in image_directory.glob("*.jpg"))
+
+    count = check_images()
+
+    if count == 44441:
+        print(f"[SKIP] {count} product images are already present")
         return
+
+    if count > 0:
+        raise SystemExit(f"[ERROR] Incomplete image catalog: {count}/44441")
 
     try:
         import kagglehub
-    except ImportError as error:
-        raise SystemExit("Install Kaggle downloader first: pip install kagglehub") from error
 
-    print("[DOWNLOAD] Kaggle: fashion-product-images-small")
-    kagglehub.dataset_download(
-        "paramaggarwal/fashion-product-images-small",
-        output_dir=str(ROOT / "data" / "images"),
-    )
-    if not image_directory.is_dir() or not any(image_directory.glob("*.jpg")):
-        raise RuntimeError(
-            "Kaggle download completed, but images were not found in data/images/images. "
-            "Check the downloaded dataset folder structure before running the app."
+        print("[DOWNLOAD] Kaggle: fashion-product-images-small")
+        kagglehub.dataset_download(
+            "paramaggarwal/fashion-product-images-small",
+            output_dir=str(root),
         )
+
+    except Exception as error:
+        raise SystemExit(
+            f"[WARNING] Kaggle download failed: {type(error).__name__}\n"
+            "Download images manually from:\n"
+            "https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-small\n"
+            "Extract the images into data/images/images/ and rerun setup_assets.py"
+        ) from None
+
+    count = check_images()
+
+    if count != 44441:
+        raise SystemExit(f"[ERROR] Expected 44441 images, found {count}")
+
     print("[OK] Product images are ready")
 
 
