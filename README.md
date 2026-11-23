@@ -25,6 +25,7 @@ A visual fashion recommendation application built with **TensorFlow, ResNet50, s
 ```text
 .
 ├── app.py
+├── setup_assets.py
 ├── Fashion_Batch_Processing.ipynb
 ├── kontrol.py
 ├── requirements.txt
@@ -42,17 +43,46 @@ A visual fashion recommendation application built with **TensorFlow, ResNet50, s
 
 ## Required data and model files
 
-Large assets are **not included in the Git repository**. Before starting the application, prepare these three assets:
+## Required data and model files
+
+Large assets are **not included in the Git repository**. The application requires the following three assets:
 
 | Asset | Expected location | Source |
 |---|---|---|
-| Saved ResNet50 feature extractor (~93 MB) | `models/fashion_resnet50.keras` | Project GitHub Release asset — **not yet published** |
-| Precomputed feature catalog (~281 MB) | `data/all_features.npz` | Project GitHub Release asset — **not yet published** |
+| Saved ResNet50 feature extractor (~93 MB) | `models/fashion_resnet50.keras` | [GitHub Release v1.0.0](https://github.com/mcetin34/fashion-recommendation-system/releases/tag/v1.0.0) |
+| Precomputed feature catalog (~281 MB) | `data/all_features.npz` | [GitHub Release v1.0.0](https://github.com/mcetin34/fashion-recommendation-system/releases/tag/v1.0.0) |
 | Fashion product images | `data/images/images/*.jpg` | [Kaggle — Fashion Product Images (Small)](https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-small) |
 
-**Image extraction:** Download the **Small** dataset (not the large full-resolution dataset). Extract its `images` folder so that a file such as `data/images/images/10000.jpg` exists. Do not rename individual image files: filenames must correspond to the precomputed feature catalog.
+### Automatic asset setup
 
-**Current availability:** Until the project Release assets are published, `fashion_resnet50.keras` and `all_features.npz` must be provided from the original project files. Downloading the repository alone is therefore **not sufficient** to build or run the full application.
+The project includes `setup_assets.py` to simplify installation.
+
+Run:
+
+```bash
+pip install kagglehub
+python setup_assets.py
+```
+
+The setup script checks whether the required assets already exist. If they are missing, it attempts to download:
+
+- The saved ResNet50 model from GitHub Releases.
+- The precomputed feature catalog from GitHub Releases.
+- The product images from Kaggle.
+
+Existing assets are skipped to avoid unnecessary downloads.
+
+### Manual setup
+
+Alternatively, download the model and feature catalog from [GitHub Releases](https://github.com/mcetin34/fashion-recommendation-system/releases/tag/v1.0.0) and place them in their expected directories.
+
+Download the **Small** version of the Kaggle dataset, not the full-resolution version.
+
+Extract the images so that a file such as `data/images/images/10000.jpg` exists.
+
+**Important:** Do not rename the images. Their filenames must match the precomputed feature catalog.
+
+**Note:** The automatic setup has been tested with existing local assets. A complete download from a clean environment has not yet been verified.
 
 ## Run locally
 
@@ -60,6 +90,8 @@ Requires Python and the three assets above.
 
 ```bash
 pip install -r requirements.txt
+pip install kagglehub
+python setup_assets.py
 streamlit run app.py --server.port 8502
 ```
 
@@ -70,13 +102,16 @@ Open <http://localhost:8502>.
 Requires Docker Desktop / Docker Engine and the same assets in the paths shown above **before building**. The current `dockerfile` copies the model, catalog, and images into the Docker image.
 
 ```bash
+pip install kagglehub
+python setup_assets.py
+
 docker build -t fashion-recommender .
 docker run --rm -p 8504:8501 --name fashion-recommender-app fashion-recommender
 ```
 
 Open <http://localhost:8504>.
 
-> The full Docker image includes the product images and may be large. Model/catalog downloads are **not automated yet**; a future setup script can download the Release assets after their public URLs exist.
+
 
 ## Notebook and reproducibility
 
@@ -100,6 +135,8 @@ Dataset: [Fashion Product Images (Small)](https://www.kaggle.com/datasets/parama
 - [x] Google Colab feature extraction and notebook
 - [x] Streamlit recommendations using the full local catalog
 - [x] Full local Docker build and runtime test
-- [ ] Publish model and catalog files as GitHub Release assets
-- [ ] Add automated asset setup and a lightweight online demo
+- [x] Publish model and catalog files as GitHub Release assets
+- [x] Add automatic asset setup script
+- [ ] Verify asset downloads in a clean environment
+- [ ] Deploy a lightweight online demo
 - [ ] Add a public demo video / screenshots
