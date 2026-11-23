@@ -2,6 +2,16 @@
 
 A visual fashion recommendation application built with **TensorFlow, ResNet50, scikit-learn, and Streamlit**. Upload a product photo to discover visually similar items from a catalog of **44,441 fashion images**.
 
+## Live Demo
+
+🚀 [Try the Fashion Recommendation System](https://fashion-recommendation-system-2.streamlit.app/)
+
+Upload a fashion product image and discover five visually similar products using Deep Learning.
+
+**Online Demo:** 1,000 products  
+**Full Docker Version:** 44,441 products
+
+
 ## Features
 
 - Uses an ImageNet-pretrained **ResNet50** backbone and `GlobalMaxPool2D` for feature extraction.
