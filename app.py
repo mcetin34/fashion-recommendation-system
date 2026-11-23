@@ -3,22 +3,27 @@ from tensorflow.keras.applications.resnet50 import preprocess_input
 from PIL import Image
 import streamlit as st
 import tensorflow as tf
+import os
 
 from sklearn.neighbors import NearestNeighbors
 from pathlib import Path
+from setup_assets import ROOT, download_asset
+
+DEMO_MODE = os.getenv("DEMO_MODE", "0") == "1"
 
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model(
-        "models/fashion_resnet50.keras",
-        compile=False
-    )
+    model_path = ROOT / "models" / "fashion_resnet50.keras"
+    download_asset("fashion_resnet50.keras", model_path)
+    return tf.keras.models.load_model(model_path, compile=False)
 
 model = load_model()
 
 @st.cache_resource
 def load_catalog():
-    with np.load("data/all_features.npz") as data:
+    path = "demo/all_features.npz" if DEMO_MODE else "data/all_features.npz"
+
+    with np.load(path) as data:
         return data["features"], data["filenames"]
 
 all_features, all_filenames = load_catalog()
@@ -77,7 +82,8 @@ if uploaded_file is not None:
     columns = st.columns(5)
 
     for col, idx in zip(columns, indices[0][:5]):
-        img_path = Path("data/images/images") / str(all_filenames[idx])
+        image_dir = Path("demo/images") if DEMO_MODE else Path("data/images/images")
+        img_path = image_dir / str(all_filenames[idx])
 
         with col:
             if img_path.exists():
